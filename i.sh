@@ -1,0 +1,1 @@
+npm config set allow-remote true

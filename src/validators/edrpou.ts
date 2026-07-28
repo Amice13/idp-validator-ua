@@ -6,6 +6,7 @@ const validateEdrpou = (value: number | string | undefined): boolean => {
   let coefficients = isSpecific ? [7, 1, 2, 3, 4, 5, 6] : [1, 2, 3, 4, 5, 6, 7]
   let sum = coefficients.reduce((acc, val, i) => acc + val * (numbers?.[i] ?? 0), 0)
   let result = sum % 11
+  console.log(result)
   if (result === 10) {
     coefficients = isSpecific ? [9, 3, 4, 5, 6, 7, 8] : [3, 4, 5, 6, 7, 8, 9]
     sum = coefficients.reduce((acc, val, i) => acc + val * (numbers?.[i] ?? 0), 0)
