@@ -16,4 +16,15 @@ const validateEdrpou = (value: number | string | undefined): boolean => {
   return numbers[7] === result
 }
 
-export default validateEdrpou
+const regex = /\d{8}/
+
+const validateOrganization = (organization?: string) => {
+  if (organization === undefined) throw new Error('Це обов\'язкове поле для заповнення')
+  const match = organization.match(regex)
+  if (match === null) throw new Error('Це поле не містить код ЄДРПОУ')
+  const edrpou = match[0]
+  if (edrpou === undefined) throw new Error('Це поле не містить код ЄДРПОУ')
+  return validateEdrpou(edrpou)
+}
+
+export default validateOrganization
