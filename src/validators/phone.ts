@@ -1,6 +1,6 @@
 import mobileOperators from '@/dicts/mobile-operators'
 
-const validSymbols = /^[+\d, ]$/
+const validSymbols = /^[+\d, ]+$/
 const phoneMask = /^\+\d{12}$/
 
 const validatePhone = (phone: string): boolean => {

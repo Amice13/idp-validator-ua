@@ -1,4 +1,4 @@
-const validSymbols = /^[\d, ]$/
+const validSymbols = /^[\d, ]+$/
 const checkVulnerabilities = (vulnerabilitiesString: string) => {
   if (!validSymbols.test(vulnerabilitiesString)) throw new Error('Перелік вразливих категорій містить зайві символи')
   const vulnerabilities = vulnerabilitiesString.trim().split(/ *, */g)

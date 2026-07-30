@@ -1,6 +1,10 @@
 const sourceDate = new Date('1899-12-31')
 
-const getDataFromTaxId = (str: string | number): Partial<Person> => {
+const getDataFromTaxId = (str: string | number): {
+  birthday: string
+  gender: string
+  age: number
+} => {
   const stringToCheck = String(str)
   let daysSinceBirthday = parseInt(stringToCheck.slice(0, 5))
   if (stringToCheck[0] === undefined) throw Error('Це невірний РНОКПП')

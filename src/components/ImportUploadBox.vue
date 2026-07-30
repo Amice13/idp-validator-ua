@@ -159,7 +159,9 @@ const processXlsx = async (file: File): Promise<string[][]> => {
     cellNF: false,
     cellText: false
   })
+  if (workbook?.SheetNames?.[0] === undefined) throw new Error('Робочий лист не знайдено')
   const worksheet = workbook.Sheets[workbook.SheetNames[0]]
+  if (worksheet === undefined) throw new Error('Робочий лист не знайдено')
   return XLSX.utils.sheet_to_json(worksheet, { header: 1 })
 }
 

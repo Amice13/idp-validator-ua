@@ -21,7 +21,7 @@ const convertRawToTyped = (data: Array<Record<string, unknown>>): Row[] => {
         obj.birthday = d.birthday.toLocaleDateString('sv')
       }
     }
-    obj.category = d.category as string | undefined
+    obj.category = d.category === undefined ? undefined : String(d.category)
     obj.documentNumber = d.documentNumber === undefined ? undefined : String(d.documentNumber)
     obj.documentType = d.documentType as typeof documentTypes[number] | undefined
     obj.gender = d.gender as typeof genders[number] | undefined

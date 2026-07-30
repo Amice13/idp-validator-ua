@@ -15,6 +15,8 @@ import validateOrganization from '@/validators/edrpou'
 import validateIBAN from '@/validators/iban'
 import checkIdpDate from '@/validators/idp-date'
 import validateIdpNumber from '@/validators/idp-number'
+import getGenderFromAdditionalName from './get-gender-from-additional-name'
+import getDataFromTaxId from './get-data-from-tax-id'
 
 const validateRecord = (record: Row) => {
   const errors: Issue[] = []
@@ -193,7 +195,7 @@ const validateRecord = (record: Row) => {
   // Vulnerabilities
   if (record.vulnerabilities !== undefined) {
     try {
-      checkVulnerabilities(record.recentAdmin4)
+      checkVulnerabilities(record.vulnerabilities)
     } catch (err) {
       errors.push({
         field: 'vulnerabilities',
@@ -216,6 +218,23 @@ const validateRecord = (record: Row) => {
 
   // Tax ID
   if (record.taxId !== undefined) {
+    const { birthday, gender } = getDataFromTaxId(record.taxId)
+    if (record.birthday !== undefined) {
+      if (record.birthday !== birthday) {
+        errors.push({
+          field: 'gender',
+          type: 'warning',
+          description: 'Стать не збігається із значенням закодованим в коді ЄДРПОУ'
+        })
+      }
+      if (record.gender !== gender) {
+        errors.push({
+          field: 'gender',
+          type: 'warning',
+          description: 'Стать не збігається за іменем по батькові'
+        })
+      }
+    }
     try {
       validateTaxId(record.taxId)
     } catch (err) {
@@ -238,6 +257,7 @@ const validateRecord = (record: Row) => {
     try {
       validateGender(record.gender)
     } catch (err) {
+      // console.log(record)
       errors.push({
         field: 'gender',
         type: 'error',
@@ -255,7 +275,7 @@ const validateRecord = (record: Row) => {
     })
   } else {
     try {
-      validateBirthday(record.gender)
+      validateBirthday(record.birthday)
     } catch (err) {
       errors.push({
         field: 'birthday',
@@ -288,6 +308,7 @@ const validateRecord = (record: Row) => {
 
   if (record.category !== undefined) {
     if (!['1', '2'].includes(record.category)) {
+      console.log(record.category)
       errors.push({
         field: 'category',
         type: 'error',
