@@ -3,7 +3,7 @@ import type { Row } from '@/types/row'
 import hasSpaces from '@/validators/has-spaces'
 import hasLatin from '@/validators/has-latin' 
 import validatePatronymic from '@/validators/patronymic'
-import hasKatottg from '@/validators/has-katottg'
+import checkKatottg from '@/validators/katottg'
 import checkVulnerabilities from '@/validators/vulnerabilities'
 import validateTaxId from '@/validators/tax-id'
 import validateGender from '@/validators/gender'
@@ -12,23 +12,29 @@ import validatePhone from '@/validators/phone'
 import validateDocumentType from '@/validators/document-type'
 import validateDocumentNumber from '@/validators/document-number'
 import validateOrganization from '@/validators/edrpou'
+import validateCategory from '@/validators/category'
 import validateIBAN from '@/validators/iban'
 import checkIdpDate from '@/validators/idp-date'
 import validateIdpNumber from '@/validators/idp-number'
 import getGenderFromAdditionalName from './get-gender-from-additional-name'
 import getDataFromTaxId from './get-data-from-tax-id'
+import getDifferenceInYears from './get-difference-in-years'
+import convertDate from './convert-date'
+import extractKatottg from './extract-katottg'
+import validateCyryllicName from '@/validators/cyryllic-name'
+import regions from '@/dicts/regions'
 
 const validateRecord = (record: Row) => {
   const errors: Issue[] = []
 
-  const isHH = typeof record.hhTaxId === 'string' &&  record.taxId === record.hhTaxId
+  const isHH = record.category === '1'
 
   // Surname
   if (record.surname === undefined) {
     errors.push({
       field: 'surname',
       type: 'error',
-      description: 'Це обов\'зякове поле'
+      description: 'Це обов\'язкове поле'
     })
   } else {
     try {
@@ -56,7 +62,7 @@ const validateRecord = (record: Row) => {
     errors.push({
       field: 'givenName',
       type: 'error',
-      description: 'Це обов\'зякове поле'
+      description: 'Це обов\'язкове поле'
     })
   } else {
     try {
@@ -84,7 +90,7 @@ const validateRecord = (record: Row) => {
     errors.push({
       field: 'additionalName',
       type: 'warning',
-      description: 'Поле є пустим'
+      description: 'Поле є незаповненим'
     })
   } else {
     try {
@@ -117,79 +123,184 @@ const validateRecord = (record: Row) => {
   }
 
   // Admins
-  try {
-    hasKatottg(record.admin1, 1)
-  } catch (err) {
-    errors.push({
-      field: 'admin1',
-      type: 'warning',
-      description: err instanceof Error ? err.message : String(err)
-    })
-  }
-  try {
-    hasKatottg(record.admin2, 2)
-  } catch (err) {
-    errors.push({
-      field: 'admin2',
-      type: 'warning',
-      description: err instanceof Error ? err.message : String(err)
-    })
-  }
-  try {
-    hasKatottg(record.admin3, 3)
-  } catch (err) {
+  const katottg3 = extractKatottg(record.admin3 ?? '')
+  if (katottg3 === null) {
     errors.push({
       field: 'admin3',
-      type: 'warning',
-      description: err instanceof Error ? err.message : String(err)
+      type: 'error',
+      description: 'Не містить код КАТОТТГ'
     })
+  } else {
+    try {
+      checkKatottg(katottg3, 3)
+    } catch (err) {
+      errors.push({
+        field: 'admin3',
+        type: 'error',
+        description: err instanceof Error ? err.message : String(err)
+      })
+    }
   }
-  try {
-    hasKatottg(record.admin4, 4)
-  } catch (err) {
+  const katottg4 = extractKatottg(record.admin4 ?? '')
+  if (katottg4 === null) {
     errors.push({
       field: 'admin4',
-      type: 'warning',
-      description: err instanceof Error ? err.message : String(err)
+      type: 'error',
+      description: 'Не містить код КАТОТТГ'
     })
-  }
+  } else {
+    try {
+      checkKatottg(katottg4, 4)
+    } catch (err) {
+      errors.push({
+        field: 'admin4',
+        type: 'error',
+        description: err instanceof Error ? err.message : String(err)
+      })
+    }
+    if (katottg3 !== null && katottg4.slice(0, 9) !== katottg3.slice(0, 9)) {
+      errors.push({
+        field: 'admin3',
+        type: 'error',
+        description: 'КАТОТТГ населеного пункту не відповідає КАТОТТГ громади'
+      })
+    }
 
+    const pCode1 = katottg4.slice(0, 4)
+    const pCode2 = katottg4.slice(0, 6)
+    const admin1 = regions[pCode1 as keyof typeof regions]
+    const admin1Name = regions[pCode1 + 'name' as keyof typeof regions]
+    const admin2 = regions[pCode2 as keyof typeof regions]
+    const admin2Name = regions[pCode2 + 'name' as keyof typeof regions]
+
+    if (record.admin1 === undefined) {
+      errors.push({
+        field: 'admin1',
+        type: 'error',
+        description: 'Це обов\'язкове поле'
+      })
+    } else {
+      if (admin1 !== record.admin1 && admin1Name !== record.admin1) {
+        errors.push({
+          field: 'admin1',
+          type: 'error',
+          description: 'Область не відповідає коду КАТОТТГ, зазначеному у населеному пункті'
+        })
+      }
+    }
+    if (record.admin2 === undefined) {
+      errors.push({
+        field: 'admin2',
+        type: 'error',
+        description: 'Це обов\'язкове поле'
+      })
+    } else {
+      if (admin2 !== record.admin2 && admin2Name !== record.admin2) {
+        errors.push({
+          field: 'admin2',
+          type: 'error',
+          description: 'Район не відповідає коду КАТОТТГ, зазначеному у населеному пункті'
+        })
+      }
+    }
+  }
+  if (record.street === undefined || record.street === '') {
+    errors.push({
+      field: 'street',
+      type: 'error',
+      description: 'Це обов\'язкове поле'
+    })
+    try {
+      validateCyryllicName(record.street)
+    } catch (err) {
+      errors.push({
+        field: 'street',
+        type: 'warning',
+        description: err instanceof Error ? err.message : String(err)
+      })
+    }
+  }
   // Recent admins
-  try {
-    hasKatottg(record.recentAdmin1, 1)
-  } catch (err) {
-    errors.push({
-      field: 'recentAdmin1',
-      type: 'warning',
-      description: err instanceof Error ? err.message : String(err)
-    })
-  }
-  try {
-    hasKatottg(record.recentAdmin2, 2)
-  } catch (err) {
-    errors.push({
-      field: 'recentAdmin2',
-      type: 'warning',
-      description: err instanceof Error ? err.message : String(err)
-    })
-  }
-  try {
-    hasKatottg(record.recentAdmin3, 3)
-  } catch (err) {
+  const recentKatottg3 = extractKatottg(record.recentAdmin3 ?? '')
+  if (recentKatottg3 === null) {
     errors.push({
       field: 'recentAdmin3',
-      type: 'warning',
-      description: err instanceof Error ? err.message : String(err)
+      type: 'error',
+      description: 'Не містить код КАТОТТГ'
     })
+  } else {
+    try {
+      checkKatottg(recentKatottg3, 3)
+    } catch (err) {
+      errors.push({
+        field: 'recentAdmin3',
+        type: 'error',
+        description: err instanceof Error ? err.message : String(err)
+      })
+    }
   }
-  try {
-    hasKatottg(record.recentAdmin4, 4)
-  } catch (err) {
+  const recentKatottg4 = extractKatottg(record.admin4 ?? '')
+  if (recentKatottg4 === null) {
     errors.push({
       field: 'recentAdmin4',
-      type: 'warning',
-      description: err instanceof Error ? err.message : String(err)
+      type: 'error',
+      description: 'Не містить код КАТОТТГ'
     })
+  } else {
+    try {
+      checkKatottg(recentKatottg4, 4)
+    } catch (err) {
+      errors.push({
+        field: 'recentAdmin4',
+        type: 'error',
+        description: err instanceof Error ? err.message : String(err)
+      })
+    }
+    if (recentKatottg3 !== null && recentKatottg4.slice(0, 9) !== recentKatottg3.slice(0, 9)) {
+      errors.push({
+        field: 'admin3',
+        type: 'error',
+        description: 'КАТОТТГ населеного пункту не відповідає КАТОТТГ громади'
+      })
+    }
+
+    const pCode1 = recentKatottg4.slice(0, 4)
+    const pCode2 = recentKatottg4.slice(0, 6)
+    const admin1 = regions[pCode1 as keyof typeof regions]
+    const admin1Name = regions[pCode1 + 'name' as keyof typeof regions]
+    const admin2 = regions[pCode2 as keyof typeof regions]
+    const admin2Name = regions[pCode2 + 'name' as keyof typeof regions]
+
+    if (record.recentAdmin1 === undefined) {
+      errors.push({
+        field: 'recentAdmin1',
+        type: 'error',
+        description: 'Це обов\'язкове поле'
+      })
+    } else {
+      if (admin1 !== record.recentAdmin1 && admin1Name !== record.recentAdmin1) {
+        errors.push({
+          field: 'recentAdmin1',
+          type: 'error',
+          description: 'Область не відповідає коду КАТОТТГ, зазначеному у населеному пункті'
+        })
+      }
+    }
+    if (record.recentAdmin2 === undefined) {
+      errors.push({
+        field: 'recentAdmin2',
+        type: 'error',
+        description: 'Це обов\'язкове поле'
+      })
+    } else {
+      if (admin2 !== record.recentAdmin2 && admin2Name !== record.recentAdmin2) {
+        errors.push({
+          field: 'recentAdmin2',
+          type: 'error',
+          description: 'Район не відповідає коду КАТОТТГ, зазначеному у населеному пункті'
+        })
+      }
+    }
   }
 
   // Vulnerabilities
@@ -251,7 +362,7 @@ const validateRecord = (record: Row) => {
     errors.push({
       field: 'gender',
       type: 'error',
-      description: 'Це обов\'зякове поле'
+      description: 'Це обов\'язкове поле'
     })
   } else {
     try {
@@ -264,18 +375,37 @@ const validateRecord = (record: Row) => {
         description: err instanceof Error ? err.message : String(err)
       })
     }
+    if (record.additionalName !== undefined && record.additionalName !== '') {
+      const patronmyicGender = getGenderFromAdditionalName(record.additionalName)
+      if (record.gender !== patronmyicGender) {
+        errors.push({
+          field: 'gender',
+          type: 'error',
+          description: 'По батькові та стать особи не збігаються'
+        })
+      }
+    }
   }
   
   // Birthday
-  if (record.birthday === undefined) {
+  try {
+    validateBirthday(record.birthday)
+  } catch (err) {
     errors.push({
       field: 'birthday',
       type: 'error',
-      description: 'Це обов\'зякове поле'
+      description: err instanceof Error ? err.message : String(err)
     })
-  } else {
+  }
+
+  if (record.birthday !== undefined) {
     try {
-      validateBirthday(record.birthday)
+      const birthday = convertDate(record.birthday)
+      const today = new Date()
+      if (birthday !== null) {
+        const difference = getDifferenceInYears(birthday, today)
+        if (difference < 18) throw new Error('Голова домогосподарства не може бути молодшим за 18 років')
+      }
     } catch (err) {
       errors.push({
         field: 'birthday',
@@ -301,20 +431,19 @@ const validateRecord = (record: Row) => {
       errors.push({
         field: 'phone',
         type: 'error',
-        description: 'Це обов\'зякове поле для голови домогосподарства'
+        description: 'Це обов\'язкове поле для голови домогосподарства'
       })
     }
   }
 
-  if (record.category !== undefined) {
-    if (!['1', '2'].includes(record.category)) {
-      console.log(record.category)
-      errors.push({
-        field: 'category',
-        type: 'error',
-        description: 'Категорія зазначена невірно'
-      })
-    }
+  try {
+    validateCategory(record.phone)
+  } catch (err) {
+    errors.push({
+      field: 'category',
+      type: 'error',
+      description: err instanceof Error ? err.message : String(err)
+    })
   }
 
   // Document type
@@ -399,8 +528,6 @@ const validateRecord = (record: Row) => {
       })
     }
   }
-  // street: string
-  // recentStreet: string
   return errors
 }
 

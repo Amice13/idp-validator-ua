@@ -1,33 +1,8 @@
-const validateBirthday = (date: string | Date): boolean => {
-  let birthday: Date
+ import convertDate from '@/utils/convert-date'
 
-  if (typeof date === 'string') {
-    const match = /^(\d{4})-(\d{2})-(\d{2})$/.exec(date)
-
-    if (match === null) throw new Error('Невідповідний формат дати')
-
-    const [, yearStr, monthStr, dayStr] = match
-
-    const year = Number(yearStr)
-    const month = Number(monthStr)
-    const day = Number(dayStr)
-
-    birthday = new Date(year, month - 1, day)
-
-    // Verify it is a real date
-    if (
-      birthday.getFullYear() !== year ||
-      birthday.getMonth() !== month - 1 ||
-      birthday.getDate() !== day
-    ) {
-      throw new Error('Невідповідний формат дати')
-    }
-  } else {
-    birthday = date
-    if (Number.isNaN(birthday.getTime())) {
-      throw new Error('Невідповідний формат дати')
-    }
-  }
+const validateBirthday = (date?: string | Date): boolean => {
+  const birthday = convertDate(date)
+  if (birthday === null) throw new Error('Це обов\'язкове поле для заповнення')
 
   const today = new Date()
 

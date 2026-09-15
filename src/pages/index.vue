@@ -20,8 +20,8 @@
             </ul>
             <v-row>
               <v-col cols="12">
-                <v-btn @click="download" class="mr-2"" color="primary" text="Завантажити" />
-                <v-btn @click="reset" class="mr-2"" color="error" text="Скинути" />
+                <v-btn @click="download" class="mr-2" color="primary" text="Завантажити" />
+                <v-btn @click="reset" class="mr-2" color="error" text="Скинути" />
               </v-col>
             </v-row>
           </v-card-text>
@@ -50,6 +50,7 @@ const appBaseUrl = new URL(import.meta.env.BASE_URL, window.location.origin)
 let results: unknown[] = []
 
 watch(() => data, async (data) => {
+  if (data.value.length === 0) return
   const objects = convertRowsToObjects(data.value)
   const records = convertRawToTyped(objects)
   hh.value = new Set(records.map(el => el.hhTaxId).filter(Boolean)).size
@@ -123,6 +124,7 @@ watch(() => data, async (data) => {
 }, {
   deep: true
 })
+// Imported from data according to the Resolution 1084 Resolution 1084
 
 const download = async () => {
   const file = await fetch(appBaseUrl + 'export.xlsx')

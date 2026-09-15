@@ -18,7 +18,7 @@ const validateEdrpou = (value: number | string | undefined): boolean => {
 
 const regex = /\d{8}/
 
-const validateOrganization = (organization?: string) => {
+const validateOrganization = (organization?: string): boolean => {
   if (organization === undefined) throw new Error('Це обов\'язкове поле для заповнення')
   const match = organization.match(regex)
   if (match === null) throw new Error('Це поле не містить код ЄДРПОУ')
