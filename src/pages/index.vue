@@ -21,6 +21,7 @@
             <v-row>
               <v-col cols="12">
                 <v-btn @click="download" class="mr-2" color="primary" text="Завантажити" />
+                <v-btn @click="downloadRais" class="mr-2" color="green-darken-2" text="Підготувати для RAIS+" />
                 <v-btn @click="reset" class="mr-2" color="error" text="Скинути" />
               </v-col>
             </v-row>
@@ -32,11 +33,7 @@
 </template>
 
 <script lang="ts" setup>
-import convertRowsToObjects from '@/utils/convert-rows-to-objects'
-import convertRawToTyped from '@/utils/convert-raw-to-typed'
-import getDuplicates from '@/utils/find-duplicates'
-import validateRecord from '@/utils/validate-record'
-import formatIssue from '@/utils/format-issue'
+import validate from '@/functions/validate'
 import { downloadXlsx } from 'xlsx-template-browser'
 
 const ready = ref<boolean>(false)
@@ -50,76 +47,17 @@ const appBaseUrl = new URL(import.meta.env.BASE_URL, window.location.origin)
 let results: unknown[] = []
 
 watch(() => data, async (data) => {
-  if (data.value.length === 0) return
-  const objects = convertRowsToObjects(data.value)
-  const records = convertRawToTyped(objects)
-  hh.value = records.map(el => el.category === '1').filter(Boolean).length
-  processedRecords.value = records.length
-  const duplicatedIbans = getDuplicates(records.map(el => el.iban).filter(Boolean))
-  const duplicatedTaxIds = getDuplicates(records.map(el => el.taxId).filter(Boolean)).filter(el => !['Відсутній', 'відсутній'].includes(el))
-  const duplicatedPhones = getDuplicates(records.map(el => el.phone?.split(/,/)).flat().filter(Boolean))
-  const duplicatedDocs = getDuplicates(records.map(el => el.documentNumber).filter(Boolean))
-  const duplicatedIdp = getDuplicates(records.map(el => el.idpNumber).filter(Boolean))
-  const result = []
-  
-  let errorNumber = 0
-  let warningNumber = 0
+  const validated = validate(data.value)
+  if (validated === undefined) return alert('Використано невідповідний шаблон')
+  const { result, warningNumber, errorNumber } = validated
 
-  for (const r of records) {
-    const issues = validateRecord(r)
-    if (duplicatedIbans.includes(r.iban)) {
-      issues.push({
-        field: 'iban',
-        type: 'error',
-        description: 'Цей IBAN дублюється'
-      })
-    }
-    if (duplicatedTaxIds.includes(r.taxId)) {
-      issues.push({
-        field: 'taxId',
-        type: 'error',
-        description: 'Цей РНОКПП дублюється'
-      })
-    }
-    if (duplicatedDocs.includes(r.documentNumber)) {
-      issues.push({
-        field: 'documentNumber',
-        type: 'error',
-        description: 'Цей номер документа, що посвідчує особу не є унікальним'
-      })
-    }
-    if (duplicatedPhones.includes(r.phone)) {
-      issues.push({
-        field: 'phone',
-        type: 'error',
-        description: 'Цей номер телефона дублюється'
-      })
-    }
-    if (duplicatedIdp.includes(r.idpNumber)) {
-      issues.push({
-        field: 'idpNumber',
-        type: 'error',
-        description: 'Цей номер посвідчення ВПО дублюється'
-      })
-    }
-    warningNumber = warningNumber + issues.filter(el => el.type === 'warning').length 
-    errorNumber = errorNumber + issues.filter(el => el.type === 'error').length 
-    const issue = formatIssue(issues)
-    const obj = {
-      ...r,
-      ...(r.birthday === undefined ? { birthday: '' } : { birthday: new Date(r.birthday) }),
-      ...(r.idpDate === undefined ? { idpDate: '' } : { idpDate: new Date(r.idpDate) }),
-      issue
-    }
-    for (const key of Object.keys(obj)) {
-      if (obj[key as keyof typeof obj] === undefined) obj[key as keyof typeof obj] = ''
-    }
-    result.push(obj)
-  }
+  processedRecords.value = result.length
+  hh.value = result.map(el => el.category === '1').filter(Boolean).length
+
   warnings.value = warningNumber
   errors.value = errorNumber
-  
   results = result
+
   ready.value = true
 }, {
   deep: true
@@ -130,6 +68,26 @@ const download = async () => {
   const file = await fetch(appBaseUrl + 'export.xlsx')
   const buffer = await file.arrayBuffer()
   downloadXlsx(buffer, { data: results })
+}
+
+import documentTypesDict from '@/dicts/'
+const downloadRais = () => {
+  const households = []
+  const assistances = []
+
+${table:data.headOfHouseholdId} ${table:data.documentNumber}  ${table:data.documentType}  ${table:data.familyName}  ${table:data.givenName} ${table:data.additionalName}  ${table:data.birthday}  ${table:data.gender}  ${table:data.phone} ${table:data.comments}  ${table:data.tags}
+
+  let headOfHouseholdId = undefined
+  for (const record of (results as Array<Record<string, unknown>>)) {
+    const data: Record<string, unknown> = {}
+
+    const taxId = ['Відсутній', 'відсутній'].includes(record.taxId as string) ?
+      record.documentNumber : record.taxId
+    if (record.category === '1') headOfHouseholdId = taxId
+    data.headOfHouseholdId = headOfHouseholdId
+    data.documentType = ['Відсутній', 'відсутній'].includes(record.taxId as string) ? 'Tax Identification Number' : 'Test'
+
+  }
 }
 
 const reset = () => {

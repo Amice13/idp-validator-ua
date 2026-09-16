@@ -1,8 +1,3 @@
-// import csvWorker from '@/workers/simple-csv-parser.ts?worker'
-
-
-// const worker = new csvWorker()
-
 const worker = new Worker(
   new URL('@/workers/simple-csv-parser.ts', import.meta.url),
   { type: 'module' }
