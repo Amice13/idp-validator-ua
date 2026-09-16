@@ -5,8 +5,8 @@ const convertRowsToObjects = (rows: Array<unknown[]>): Array<Record<string, unkn
   let headersIndex = -1
   for (const row of rows) {
     headersIndex++
-    const number = row.filter((el) => headerNames.includes(el as string)).filter(Boolean).length
-    if ((number / row.length) > 0.8) break 
+    const number = row.filter((el) => headerNames.includes(String(el) as string)).filter(Boolean).length
+    if ((number / row.length) > 0.8) break
   }
   if (headersIndex === -1) throw new Error('Таблиця не містить заголовків')
   const headers = rows[headersIndex]?.map(name => fields[name as keyof typeof fields])

@@ -26,7 +26,6 @@ const convertRawToTyped = (data: Array<Record<string, unknown>>): Row[] => {
     obj.documentType = d.documentType as typeof documentTypes[number] | undefined
     obj.gender = d.gender as typeof genders[number] | undefined
     obj.givenName = d.givenName as string | undefined
-    obj.hhTaxId = d.hhTaxId === undefined ? undefined : String(d.hhTaxId).padStart(10, '0')
     obj.iban = d.iban as string | undefined
     if (d.idpDate !== undefined) {
       if (typeof d.idpDate === 'string') {

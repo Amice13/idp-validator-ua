@@ -222,84 +222,86 @@ const validateRecord = (record: Row) => {
     }
   }
   // Recent admins
-  const recentKatottg3 = extractKatottg(record.recentAdmin3 ?? '')
-  if (recentKatottg3 === null) {
-    errors.push({
-      field: 'recentAdmin3',
-      type: 'error',
-      description: 'Не містить код КАТОТТГ'
-    })
-  } else {
-    try {
-      checkKatottg(recentKatottg3, 3)
-    } catch (err) {
+  if (record.recentAdmin4 !== undefined) {
+    const recentKatottg3 = extractKatottg(record.recentAdmin3 ?? '')
+    if (recentKatottg3 === null) {
       errors.push({
         field: 'recentAdmin3',
         type: 'error',
-        description: err instanceof Error ? err.message : String(err)
-      })
-    }
-  }
-  const recentKatottg4 = extractKatottg(record.admin4 ?? '')
-  if (recentKatottg4 === null) {
-    errors.push({
-      field: 'recentAdmin4',
-      type: 'error',
-      description: 'Не містить код КАТОТТГ'
-    })
-  } else {
-    try {
-      checkKatottg(recentKatottg4, 4)
-    } catch (err) {
-      errors.push({
-        field: 'recentAdmin4',
-        type: 'error',
-        description: err instanceof Error ? err.message : String(err)
-      })
-    }
-    if (recentKatottg3 !== null && recentKatottg4.slice(0, 9) !== recentKatottg3.slice(0, 9)) {
-      errors.push({
-        field: 'admin3',
-        type: 'error',
-        description: 'КАТОТТГ населеного пункту не відповідає КАТОТТГ громади'
-      })
-    }
-
-    const pCode1 = recentKatottg4.slice(0, 4)
-    const pCode2 = recentKatottg4.slice(0, 6)
-    const admin1 = regions[pCode1 as keyof typeof regions]
-    const admin1Name = regions[pCode1 + 'name' as keyof typeof regions]
-    const admin2 = regions[pCode2 as keyof typeof regions]
-    const admin2Name = regions[pCode2 + 'name' as keyof typeof regions]
-
-    if (record.recentAdmin1 === undefined) {
-      errors.push({
-        field: 'recentAdmin1',
-        type: 'error',
-        description: 'Це обов\'язкове поле'
+        description: 'Не містить код КАТОТТГ'
       })
     } else {
-      if (admin1 !== record.recentAdmin1 && admin1Name !== record.recentAdmin1) {
+      try {
+        checkKatottg(recentKatottg3, 3)
+      } catch (err) {
         errors.push({
-          field: 'recentAdmin1',
+          field: 'recentAdmin3',
           type: 'error',
-          description: 'Область не відповідає коду КАТОТТГ, зазначеному у населеному пункті'
+          description: err instanceof Error ? err.message : String(err)
         })
       }
     }
-    if (record.recentAdmin2 === undefined) {
+    const recentKatottg4 = extractKatottg(record.admin4 ?? '')
+    if (recentKatottg4 === null) {
       errors.push({
-        field: 'recentAdmin2',
+        field: 'recentAdmin4',
         type: 'error',
-        description: 'Це обов\'язкове поле'
+        description: 'Не містить код КАТОТТГ'
       })
     } else {
-      if (admin2 !== record.recentAdmin2 && admin2Name !== record.recentAdmin2) {
+      try {
+        checkKatottg(recentKatottg4, 4)
+      } catch (err) {
+        errors.push({
+          field: 'recentAdmin4',
+          type: 'error',
+          description: err instanceof Error ? err.message : String(err)
+        })
+      }
+      if (recentKatottg3 !== null && recentKatottg4.slice(0, 9) !== recentKatottg3.slice(0, 9)) {
+        errors.push({
+          field: 'admin3',
+          type: 'error',
+          description: 'КАТОТТГ населеного пункту не відповідає КАТОТТГ громади'
+        })
+      }
+
+      const pCode1 = recentKatottg4.slice(0, 4)
+      const pCode2 = recentKatottg4.slice(0, 6)
+      const admin1 = regions[pCode1 as keyof typeof regions]
+      const admin1Name = regions[pCode1 + 'name' as keyof typeof regions]
+      const admin2 = regions[pCode2 as keyof typeof regions]
+      const admin2Name = regions[pCode2 + 'name' as keyof typeof regions]
+
+      if (record.recentAdmin1 === undefined) {
+        errors.push({
+          field: 'recentAdmin1',
+          type: 'error',
+          description: 'Це обов\'язкове поле'
+        })
+      } else {
+        if (admin1 !== record.recentAdmin1 && admin1Name !== record.recentAdmin1) {
+          errors.push({
+            field: 'recentAdmin1',
+            type: 'error',
+            description: 'Область не відповідає коду КАТОТТГ, зазначеному у населеному пункті'
+          })
+        }
+      }
+      if (record.recentAdmin2 === undefined) {
         errors.push({
           field: 'recentAdmin2',
           type: 'error',
-          description: 'Район не відповідає коду КАТОТТГ, зазначеному у населеному пункті'
+          description: 'Це обов\'язкове поле'
         })
+      } else {
+        if (admin2 !== record.recentAdmin2 && admin2Name !== record.recentAdmin2) {
+          errors.push({
+            field: 'recentAdmin2',
+            type: 'error',
+            description: 'Район не відповідає коду КАТОТТГ, зазначеному у населеному пункті'
+          })
+        }
       }
     }
   }
