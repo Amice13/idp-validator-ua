@@ -23,6 +23,7 @@ import convertDate from './convert-date'
 import extractKatottg from './extract-katottg'
 import validateCyryllicName from '@/validators/cyryllic-name'
 import regions from '@/dicts/regions'
+import validateMFO from '@/validators/mfo'
 
 const validateRecord = (record: Row) => {
   const errors: Issue[] = []
@@ -316,38 +317,22 @@ const validateRecord = (record: Row) => {
     }
   }
 
-  // HH Tax ID
-  try {
-    validateTaxId(record.hhTaxId)
-  } catch (err) {
-    errors.push({
-      field: 'hhTaxId',
-      type: 'error',
-      description: err instanceof Error ? err.message : String(err)
-    })
-  }
-
   // Tax ID
   if (record.taxId !== undefined) {
-    const { birthday, gender } = getDataFromTaxId(record.taxId)
-    if (record.birthday !== undefined) {
-      if (record.birthday !== birthday) {
-        errors.push({
-          field: 'gender',
-          type: 'warning',
-          description: 'Стать не збігається із значенням закодованим в коді ЄДРПОУ'
-        })
-      }
-      if (record.gender !== gender) {
-        errors.push({
-          field: 'gender',
-          type: 'warning',
-          description: 'Стать не збігається за іменем по батькові'
-        })
-      }
-    }
+    errors.push({
+      field: 'taxId',
+      type: 'error',
+      description: 'Це обов\'язкове поле'
+    })
+  } else {
+    let documentType = 'undefined'
     try {
-      validateTaxId(record.taxId)
+      if (record.taxId !== 'Відсутній' || record.taxId !== 'відсутній') {
+        validateTaxId(record.taxId)
+        documentType = 'Tax ID'
+      } else {
+        documentType = 'Does not exist'
+      }
     } catch (err) {
       errors.push({
         field: 'taxId',
@@ -355,35 +340,45 @@ const validateRecord = (record: Row) => {
         description: err instanceof Error ? err.message : String(err)
       })
     }
+    if (documentType === 'Tax ID') {
+      const { birthday, gender } = getDataFromTaxId(record.taxId)
+      if (record.birthday !== undefined) {
+        if (record.birthday !== birthday) {
+          errors.push({
+            field: 'gender',
+            type: 'warning',
+            description: 'Стать не збігається із значенням закодованим в коді ЄДРПОУ'
+          })
+        }
+        if (record.gender !== gender) {
+          errors.push({
+            field: 'gender',
+            type: 'warning',
+            description: 'Стать не збігається за іменем по батькові'
+          })
+        }
+      }
+    }
   }
 
-  // Gender
-  if (record.gender === undefined) {
+  try {
+    validateGender(record.gender)
+  } catch (err) {
+    // console.log(record)
     errors.push({
       field: 'gender',
       type: 'error',
-      description: 'Це обов\'язкове поле'
+      description: err instanceof Error ? err.message : String(err)
     })
-  } else {
-    try {
-      validateGender(record.gender)
-    } catch (err) {
-      // console.log(record)
+  }
+  if (record.additionalName !== undefined && record.additionalName !== '') {
+    const patronmyicGender = getGenderFromAdditionalName(record.additionalName)
+    if (record.gender !== patronmyicGender) {
       errors.push({
         field: 'gender',
         type: 'error',
-        description: err instanceof Error ? err.message : String(err)
+        description: 'По батькові та стать особи не збігаються'
       })
-    }
-    if (record.additionalName !== undefined && record.additionalName !== '') {
-      const patronmyicGender = getGenderFromAdditionalName(record.additionalName)
-      if (record.gender !== patronmyicGender) {
-        errors.push({
-          field: 'gender',
-          type: 'error',
-          description: 'По батькові та стать особи не збігаються'
-        })
-      }
     }
   }
   
@@ -496,9 +491,10 @@ const validateRecord = (record: Row) => {
   if (record.iban !== undefined) {
     try {
       validateIBAN(record.iban)
+      validateMFO(record.iban)
     } catch (err) {
       errors.push({
-        field: 'organization',
+        field: 'iban',
         type: 'error',
         description: err instanceof Error ? err.message : String(err)
       })

@@ -22,7 +22,7 @@ const formatIssues = (issues: Issue[]): string => {
   const errors = processedIssues.filter(issue => issue.type === 'error')
   const warnings = processedIssues.filter(issue => issue.type === 'warning')
   const formattedErrors = errors.map(issue => {
-    return `(${issue.fieldIndex}) ${issue.fieldName}: ${issue.description}`
+    return `[${issue.fieldIndex}] ${issue.fieldName}: ${issue.description}`
   }).join('\n')
   const formattedWarnings = warnings.map(issue => {
     return `(${issue.fieldIndex}) ${issue.fieldName}: ${issue.description}`

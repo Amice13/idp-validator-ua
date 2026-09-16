@@ -1,7 +1,6 @@
 const fields = {
   '1': 'organization',
-  '2': 'hhTaxId',
-  '2_1': 'category',
+  '2': 'category',
   '3': 'vulnerabilities',
   '4': 'pfuCheck',
   '5': 'surname',

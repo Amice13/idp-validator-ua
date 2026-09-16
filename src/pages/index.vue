@@ -53,7 +53,8 @@ watch(() => data, async (data) => {
   if (data.value.length === 0) return
   const objects = convertRowsToObjects(data.value)
   const records = convertRawToTyped(objects)
-  hh.value = new Set(records.map(el => el.hhTaxId).filter(Boolean)).size
+  console.log(records)
+  hh.value = new Set(records.map(el => el.category === '1').filter(Boolean)).size
   processedRecords.value = records.length
   const duplicatedIbans = getDuplicates(records.map(el => el.iban).filter(Boolean))
   const duplicatedTaxIds = getDuplicates(records.map(el => el.taxId).filter(Boolean))
