@@ -241,7 +241,7 @@ const validateRecord = (record: Row) => {
         })
       }
     }
-    const recentKatottg4 = extractKatottg(record.admin4 ?? '')
+    const recentKatottg4 = extractKatottg(record.recentAdmin4 ?? '')
     if (recentKatottg4 === null) {
       errors.push({
         field: 'recentAdmin4',
@@ -320,7 +320,7 @@ const validateRecord = (record: Row) => {
   }
 
   // Tax ID
-  if (record.taxId !== undefined) {
+  if (record.taxId === undefined) {
     errors.push({
       field: 'taxId',
       type: 'error',
@@ -329,7 +329,7 @@ const validateRecord = (record: Row) => {
   } else {
     let documentType = 'undefined'
     try {
-      if (record.taxId !== 'Відсутній' || record.taxId !== 'відсутній') {
+      if (!['Відсутній', 'відсутній'].includes(record.taxId)) {
         validateTaxId(record.taxId)
         documentType = 'Tax ID'
       } else {
@@ -366,7 +366,6 @@ const validateRecord = (record: Row) => {
   try {
     validateGender(record.gender)
   } catch (err) {
-    // console.log(record)
     errors.push({
       field: 'gender',
       type: 'error',
@@ -434,7 +433,7 @@ const validateRecord = (record: Row) => {
   }
 
   try {
-    validateCategory(record.phone)
+    validateCategory(record.category)
   } catch (err) {
     errors.push({
       field: 'category',

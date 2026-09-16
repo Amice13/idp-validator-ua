@@ -50,15 +50,13 @@ const appBaseUrl = new URL(import.meta.env.BASE_URL, window.location.origin)
 let results: unknown[] = []
 
 watch(() => data, async (data) => {
-  // console.log(data)
   if (data.value.length === 0) return
   const objects = convertRowsToObjects(data.value)
   const records = convertRawToTyped(objects)
-  console.log(records)
   hh.value = records.map(el => el.category === '1').filter(Boolean).length
   processedRecords.value = records.length
   const duplicatedIbans = getDuplicates(records.map(el => el.iban).filter(Boolean))
-  const duplicatedTaxIds = getDuplicates(records.map(el => el.taxId).filter(Boolean))
+  const duplicatedTaxIds = getDuplicates(records.map(el => el.taxId).filter(Boolean)).filter(el => !['Відсутній', 'відсутній'].includes(el))
   const duplicatedPhones = getDuplicates(records.map(el => el.phone?.split(/,/)).flat().filter(Boolean))
   const duplicatedDocs = getDuplicates(records.map(el => el.documentNumber).filter(Boolean))
   const duplicatedIdp = getDuplicates(records.map(el => el.idpNumber).filter(Boolean))

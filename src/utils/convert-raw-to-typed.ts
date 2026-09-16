@@ -3,6 +3,8 @@ import genders from '@/dicts/genders'
 
 import { type Row } from '@/types/row'
 
+const taxIdRegex = /^\d{10}$/
+
 const convertRawToTyped = (data: Array<Record<string, unknown>>): Row[] => {
   const rows: Row[] = []
   for (const d of data) {
@@ -44,7 +46,11 @@ const convertRawToTyped = (data: Array<Record<string, unknown>>): Row[] => {
     obj.recentAdmin4 = d.recentAdmin4 as string | undefined
     obj.recentStreet = d.recentStreet as string | undefined
     obj.surname = d.surname as string | undefined
-    obj.taxId = d.taxId === undefined ? undefined : String(d.taxId).padStart(10, '0')
+    if (taxIdRegex.test(obj.taxId ?? '')) {
+      obj.taxId = String(d.taxId).padStart(10, '0')
+    } else {
+      obj.taxId = d.taxId as string
+    }
     obj.vulnerabilities = d.vulnerabilities === undefined ? d.vulnerabilities : String(d.vulnerabilities)
     rows.push(obj as Row)
   }
