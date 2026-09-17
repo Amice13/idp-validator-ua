@@ -1,0 +1,31 @@
+const dict = {
+  'Вулиця': 'street',
+  'Площа': 'square',
+  'Майдан': 'maidan',
+  'Шосе': 'highway',
+  'Проспект': 'avenue',
+  'Бульвар': 'boulevard',
+  'Алея': 'alley',
+  'Провулок': 'avenue',
+  'Проїзд': 'passage',
+  'Узвіз': 'descent',
+  'Тупик': 'impasse',
+  'Набережна': 'harbor',
+  'Шлях': 'path',
+  'Дорога': 'road',
+  'Заїзд': 'bout',
+  'В\'їзд': 'entrance',
+  'Завулок': 'byway',
+  'Лінія': 'лінія',
+  'Квартал': 'quarter',
+  'Мікрорайон': 'microdistrict',
+  'Жилий масив': 'residential area',
+  'Містечко': 'borough',
+  'Урочище': 'tract',
+  'Хутір': 'farmstead',
+  'Садове товариство': 'gardening',
+  'Гаражний кооператив': 'garage cooperative',
+  'Інше': 'other'
+}
+
+export default dict
