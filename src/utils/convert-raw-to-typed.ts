@@ -49,7 +49,7 @@ const convertRawToTyped = (data: Array<Record<string, unknown>>): Row[] => {
     if (taxIdRegex.test(obj.taxId ?? '')) {
       obj.taxId = String(d.taxId).padStart(10, '0')
     } else {
-      obj.taxId = d.taxId as string
+      if (d.taxId !== undefined) obj.taxId = String(d.taxId)
     }
     obj.vulnerabilities = d.vulnerabilities === undefined ? d.vulnerabilities : String(d.vulnerabilities)
     rows.push(obj as Row)
