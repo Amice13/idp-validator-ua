@@ -95,6 +95,7 @@ const downloadRais = async () => {
     data.givenName = record.givenName
     if (record.additionalName !== undefined) data.additionalName = record.additionalName
     data.gender = record.gender === 'жіноча' ? 'Female' : 'Male'
+    data.birthday = record.birthday
     if (record.phone !== undefined) data.phone = record.phone
     data.comments = 'Collected according to the Resolution 1084 of the Cabinet of the Ministers of Ukraine'
     data.tags = 'Resolution 1084, Winter Support'
