@@ -394,7 +394,7 @@ const validateRecord = (record: Row) => {
     })
   }
 
-  if (record.birthday !== undefined) {
+  if (record.birthday !== undefined && isHH) {
     try {
       const birthday = convertDate(record.birthday)
       const today = new Date()
