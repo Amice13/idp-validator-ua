@@ -489,7 +489,7 @@ const validateRecord = (record: Row) => {
     })
   }
 
-  if (record.iban !== undefined) {
+  if (record.iban !== undefined && record.iban !== 'WU') {
     try {
       validateIBAN(record.iban)
       validateMFO(record.iban)

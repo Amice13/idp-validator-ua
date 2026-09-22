@@ -8,7 +8,7 @@ const validateData = (data: unknown[][]) => {
   if (data.length === 0) return
   const objects = convertRowsToObjects(data)
   const records = convertRawToTyped(objects)
-  const duplicatedIbans = getDuplicates(records.map(el => el.iban).filter(Boolean))
+  const duplicatedIbans = getDuplicates(records.map(el => el.iban).filter(Boolean)).filter(el => el !== 'WU')
   const duplicatedTaxIds = getDuplicates(records.map(el => el.taxId).filter(Boolean)).filter(el => !['Відсутній', 'відсутній'].includes(el))
   const duplicatedPhones = getDuplicates(records.map(el => el.phone?.split(/,/)).flat().filter(Boolean))
   const duplicatedDocs = getDuplicates(records.map(el => el.documentNumber).filter(Boolean))
