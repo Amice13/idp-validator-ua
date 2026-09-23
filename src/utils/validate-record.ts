@@ -324,7 +324,7 @@ const validateRecord = (record: Row) => {
     errors.push({
       field: 'taxId',
       type: 'error',
-      description: 'Це обов\'язкове поле'
+      description: 'Це обов\'язкове поле. Якщо особа відмовилася від отримання номеру або ще не отримала його, напишіть "Відсутній"'
     })
   } else {
     let documentType = 'undefined'

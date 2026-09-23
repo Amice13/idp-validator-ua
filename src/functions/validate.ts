@@ -8,8 +8,12 @@ const validateData = (data: unknown[][]) => {
   if (data.length === 0) return
   const objects = convertRowsToObjects(data)
   const records = convertRawToTyped(objects)
-  const duplicatedIbans = getDuplicates(records.map(el => el.iban).filter(Boolean)).filter(el => el !== 'WU')
-  const duplicatedTaxIds = getDuplicates(records.map(el => el.taxId).filter(Boolean)).filter(el => !['Відсутній', 'відсутній'].includes(el))
+  const duplicatedIbans = getDuplicates(records.map(el => el.iban).filter(Boolean))
+  duplicatedIbans.delete('WU')
+
+  const duplicatedTaxIds = getDuplicates(records.map(el => el.taxId).filter(Boolean))
+  duplicatedTaxIds.delete('Відсутній')
+  duplicatedTaxIds.delete('відсутній')
   const duplicatedPhones = getDuplicates(records.map(el => el.phone?.split(/,/)).flat().filter(Boolean))
   const duplicatedDocs = getDuplicates(records.map(el => el.documentNumber).filter(Boolean))
   const duplicatedIdp = getDuplicates(records.map(el => el.idpNumber).filter(Boolean))
@@ -20,35 +24,35 @@ const validateData = (data: unknown[][]) => {
 
   for (const r of records) {
     const issues = validateRecord(r)
-    if (duplicatedIbans.includes(r.iban)) {
+    if (duplicatedIbans.has(r.iban)) {
       issues.push({
         field: 'iban',
         type: 'error',
         description: 'Цей IBAN дублюється'
       })
     }
-    if (duplicatedTaxIds.includes(r.taxId)) {
+    if (duplicatedTaxIds.has(r.taxId)) {
       issues.push({
         field: 'taxId',
         type: 'error',
         description: 'Цей РНОКПП дублюється'
       })
     }
-    if (duplicatedDocs.includes(r.documentNumber)) {
+    if (duplicatedDocs.has(r.documentNumber)) {
       issues.push({
         field: 'documentNumber',
         type: 'error',
         description: 'Цей номер документа, що посвідчує особу не є унікальним'
       })
     }
-    if (duplicatedPhones.includes(r.phone)) {
+    if (duplicatedPhones.has(r.phone)) {
       issues.push({
         field: 'phone',
         type: 'error',
         description: 'Цей номер телефона дублюється'
       })
     }
-    if (duplicatedIdp.includes(r.idpNumber)) {
+    if (duplicatedIdp.has(r.idpNumber)) {
       issues.push({
         field: 'idpNumber',
         type: 'error',
