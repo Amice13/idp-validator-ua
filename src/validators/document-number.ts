@@ -1,7 +1,7 @@
 const passportMask = /^[А-ЯЄІЇ]{2}\d{6}$/
 const internationalPassportMask = /^[A-Z]{2}\d{6}$/
 const idCardMask = /^\d{9}$/
-const birthCertificateMask = /^[ІV]+-[А-ЯЄІЇ]{2}\d{6}$/
+const birthCertificateMask = /^[IV]+-[А-ЯЄІЇ]{2}\d{6}$/
 const unzrMask = /^\d{8}-\d{5}$/
 
 const validateDocumentNumber = (doc: string, docType: string): boolean => {
