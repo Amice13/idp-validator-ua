@@ -11,8 +11,11 @@ const convertRowsToObjects = (rows: Array<unknown[]>): Array<Record<string, unkn
   if (headersIndex === -1) throw new Error('Таблиця не містить заголовків')
   const headers = rows[headersIndex]?.map(name => fields[name as keyof typeof fields])
   if (headers === undefined) throw new Error('Таблиця не містить заголовків')
-  rows = rows.filter(row => row.filter(el => el !== undefined).length > 4)
-  const data = rows.slice(headersIndex + 1).map(row => {
+  rows = rows.slice(headersIndex + 1)
+  rows = rows.filter(row => {
+    return row.filter(el => el !== undefined).length > 4
+  })
+  const data = rows.map(row => {
     let obj: Record<string, unknown> = {}
     for (let i = 0; i < headers.length; i++) {
       const header = headers[i]
