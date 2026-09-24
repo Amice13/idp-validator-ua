@@ -347,9 +347,9 @@ const validateRecord = (record: Row) => {
       if (record.birthday !== undefined) {
         if (record.birthday !== birthday) {
           errors.push({
-            field: 'gender',
+            field: 'birthday',
             type: 'warning',
-            description: 'Стать не збігається із значенням закодованим в коді ЄДРПОУ'
+            description: 'Дата народження не збігається із значенням закодованим в коді ЄДРПОУ'
           })
         }
         if (record.gender !== gender) {
