@@ -349,14 +349,14 @@ const validateRecord = (record: Row) => {
           errors.push({
             field: 'birthday',
             type: 'warning',
-            description: 'Дата народження не збігається із значенням закодованим в коді ЄДРПОУ'
+            description: 'Дата народження не збігається із значенням закодованим в коді РНОКПП'
           })
         }
         if (record.gender !== gender) {
           errors.push({
             field: 'gender',
             type: 'warning',
-            description: 'Стать не збігається за іменем по батькові'
+            description: 'Стать не збігається із значенням закодованим в коді РНОКПП'
           })
         }
       }
