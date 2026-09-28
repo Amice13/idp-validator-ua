@@ -209,7 +209,7 @@ const validateRecord = (record: Row) => {
     errors.push({
       field: 'street',
       type: 'error',
-      description: 'Це обов\'язкове поле'
+      description: 'Це обов\'язкове поле. Якщо в наявних документах дійсно відсутня адреса реєстрації, зазначте "Відсутня"'
     })
     try {
       validateCyryllicName(record.street)
@@ -303,6 +303,22 @@ const validateRecord = (record: Row) => {
           })
         }
       }
+    }
+  }
+  if (record.recentStreet === undefined || record.recentStreet === '') {
+    errors.push({
+      field: 'recentStreet',
+      type: 'error',
+      description: 'Це обов\'язкове поле. Якщо в наявних документах дійсно відсутня адреса реєстрації, зазначте "Відсутня"'
+    })
+    try {
+      validateCyryllicName(record.street)
+    } catch (err) {
+      errors.push({
+        field: 'recentStreet',
+        type: 'warning',
+        description: err instanceof Error ? err.message : String(err)
+      })
     }
   }
 
