@@ -223,6 +223,23 @@ const validateRecord = (record: Row) => {
   }
   // Recent admins
   if (record.recentAdmin4 !== undefined) {
+    if (record.recentStreet === undefined || record.recentStreet === '') {
+      errors.push({
+        field: 'recentStreet',
+        type: 'error',
+        description: 'Це обов\'язкове поле. Якщо в наявних документах дійсно відсутня адреса реєстрації, зазначте "Відсутня"'
+      })
+      try {
+        validateCyryllicName(record.street)
+      } catch (err) {
+        errors.push({
+          field: 'recentStreet',
+          type: 'warning',
+          description: err instanceof Error ? err.message : String(err)
+        })
+      }
+    }
+
     const recentKatottg3 = extractKatottg(record.recentAdmin3 ?? '')
     if (recentKatottg3 === null) {
       errors.push({
@@ -303,22 +320,6 @@ const validateRecord = (record: Row) => {
           })
         }
       }
-    }
-  }
-  if (record.recentStreet === undefined || record.recentStreet === '') {
-    errors.push({
-      field: 'recentStreet',
-      type: 'error',
-      description: 'Це обов\'язкове поле. Якщо в наявних документах дійсно відсутня адреса реєстрації, зазначте "Відсутня"'
-    })
-    try {
-      validateCyryllicName(record.street)
-    } catch (err) {
-      errors.push({
-        field: 'recentStreet',
-        type: 'warning',
-        description: err instanceof Error ? err.message : String(err)
-      })
     }
   }
 
