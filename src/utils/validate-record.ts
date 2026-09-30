@@ -422,7 +422,7 @@ const validateRecord = (record: Row) => {
     } catch (err) {
       errors.push({
         field: 'birthday',
-        type: 'error',
+        type: 'warning',
         description: err instanceof Error ? err.message : String(err)
       })
     }
