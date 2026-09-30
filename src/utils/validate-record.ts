@@ -391,12 +391,14 @@ const validateRecord = (record: Row) => {
   }
   if (record.additionalName !== undefined && record.additionalName !== '') {
     const patronmyicGender = getGenderFromAdditionalName(record.additionalName)
-    if (record.gender !== patronmyicGender) {
-      errors.push({
-        field: 'gender',
-        type: 'error',
-        description: 'По батькові та стать особи не збігаються'
-      })
+    if (patronmyicGender !== null) {
+      if (record.gender !== patronmyicGender) {
+        errors.push({
+          field: 'gender',
+          type: 'error',
+          description: 'По батькові та стать особи не збігаються'
+        })
+      }
     }
   }
   
