@@ -437,7 +437,7 @@ const validateRecord = (record: Row) => {
     } catch (err) {
       errors.push({
         field: 'phone',
-        type: 'error',
+        type: err instanceof Error && err.message === 'Номер телефону містить неіснючий мобільний оператор' ? 'warning' : 'error',
         description: err instanceof Error ? err.message : String(err)
       })
     }
