@@ -15,6 +15,7 @@ const validateData = (data: unknown[][]) => {
   duplicatedTaxIds.delete('Відсутній')
   duplicatedTaxIds.delete('відсутній')
   const duplicatedPhones = getDuplicates(records.map(el => el.phone?.split(/,/)).flat().filter(Boolean))
+  duplicatedPhones.delete('+38000000000')
   const duplicatedDocs = getDuplicates(records.map(el => el.documentNumber).filter(Boolean))
   const duplicatedIdp = getDuplicates(records.map(el => el.idpNumber).filter(Boolean))
   const result = []
@@ -48,7 +49,7 @@ const validateData = (data: unknown[][]) => {
     if (duplicatedPhones.has(r.phone)) {
       issues.push({
         field: 'phone',
-        type: 'error',
+        type: 'warning',
         description: 'Цей номер телефона дублюється'
       })
     }

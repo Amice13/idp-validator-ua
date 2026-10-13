@@ -433,7 +433,9 @@ const validateRecord = (record: Row) => {
   // Phone
   if (record.phone !== undefined) {
     try {
-      validatePhone(record.phone)
+      if (record.phone !== '+38000000000') {
+        validatePhone(record.phone)
+      }
     } catch (err) {
       errors.push({
         field: 'phone',
