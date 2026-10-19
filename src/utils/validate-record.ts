@@ -467,23 +467,11 @@ const validateRecord = (record: Row) => {
   try {
     validateDocumentType(record.documentType)
   } catch (err) {
-    if (
-      err instanceof Error &&
-      err.message === 'Це невірний номер свідоцтва про народження' &&
-      /^\d{1,3}-[А-ЯІЄЇҐ]{2}\s{0,1}\d{6}$/.test(record.documentNumber ?? '')
-    ) {
-      errors.push({
-        field: 'documentType',
-        type: 'warning',
-        description: err instanceof Error ? err.message : String(err)
-      })
-    } else {
-      errors.push({
-        field: 'documentType',
-        type: 'error',
-        description: err instanceof Error ? err.message : String(err)
-      })      
-    }
+    errors.push({
+      field: 'documentType',
+      type: 'error',
+      description: err instanceof Error ? err.message : String(err)
+    })
   }
 
   if (record.documentType !== undefined) {
@@ -497,11 +485,23 @@ const validateRecord = (record: Row) => {
       try {
         validateDocumentNumber(record.documentNumber, record.documentType)
       } catch (err) {
-        errors.push({
-          field: 'documentNumber',
-          type: 'error',
-          description: err instanceof Error ? err.message : String(err)
-        })
+        if (
+          err instanceof Error &&
+          err.message === 'Номер свідоцтва про народження зазначений невірно' &&
+          /^\d{1,3}-[А-ЯІЄЇҐ]{2}\s{0,1}\d{6}$/.test(record.documentNumber ?? '')
+        ) {
+          errors.push({
+            field: 'documentType',
+            type: 'warning',
+            description: err instanceof Error ? err.message : String(err)
+          })
+        } else {
+          errors.push({
+            field: 'documentNumber',
+            type: 'error',
+            description: err instanceof Error ? err.message : String(err)
+          })
+        }
       }
     }
   }
