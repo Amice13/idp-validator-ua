@@ -15,7 +15,6 @@ const downloadRais = async (results: unknown[]) => {
   const vulnerabilitiesMap = new Map<string, Set<string>>()
 
   let headOfHouseholdId = undefined
-
   for (const record of (results as Array<Record<string, unknown>>)) {
     // Household processing
     const data: Record<string, unknown> = {}
@@ -110,14 +109,13 @@ const downloadRais = async (results: unknown[]) => {
     if (map !== undefined) {
       for (const value of map.values()) {
         // @ts-ignore
-        // console.log(value, vulnerabilities[value])
         assistance.vulnerabilities['q' + value] = globalVulnerabilities[value]
       }
     }
   }
-  // const file1 = await fetch(appBaseUrl + 'RAIS - Households.xlsx')
-  // const buffer1 = await file1.arrayBuffer()
-  // downloadXlsx(buffer1, { data: households }, 'RAIS - Households.xlsx')
+  const file1 = await fetch(appBaseUrl + 'RAIS - Households.xlsx')
+  const buffer1 = await file1.arrayBuffer()
+  downloadXlsx(buffer1, { data: households }, 'RAIS - Households.xlsx')
   const file2 = await fetch(appBaseUrl + 'RAIS - Assistance.xlsx')
   const buffer2 = await file2.arrayBuffer()
   downloadXlsx(buffer2, { data: assistances }, 'RAIS - Assistances.xlsx')
