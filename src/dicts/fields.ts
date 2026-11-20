@@ -1,8 +1,8 @@
 const fields = {
   '1': 'organization',
   '2': 'category',
-  '3': 'vulnerabilities',
-  '4': 'pfuCheck',
+  '3': 'vulnerabilities1',
+  '4': 'vulnerabilities',
   '5': 'surname',
   '6': 'givenName',
   '7': 'additionalName',

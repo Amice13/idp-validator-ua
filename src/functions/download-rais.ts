@@ -5,14 +5,17 @@ import allRegions from '@/dicts/all-regions'
 import extractKatottg from '@/utils/extract-katottg'
 import translit from '@/utils/translit'
 import getAddress from '@/utils/address-parser'
+import globalVulnerabilities from '@/dicts/vulnerabilities'
 
 const appBaseUrl = new URL(import.meta.env.BASE_URL, window.location.origin)
 
 const downloadRais = async (results: unknown[]) => {
   const households = []
   const assistances = []
+  const vulnerabilitiesMap = new Map<string, Set<string>>()
 
   let headOfHouseholdId = undefined
+
   for (const record of (results as Array<Record<string, unknown>>)) {
     // Household processing
     const data: Record<string, unknown> = {}
@@ -20,6 +23,13 @@ const downloadRais = async (results: unknown[]) => {
       record.documentNumber : record.taxId
     if (record.category === '1') headOfHouseholdId = taxId
     data.headOfHouseholdId = headOfHouseholdId
+    const vulnerabilities = (record.vulnerabilities as string)?.split(/ *, */g).filter(Boolean)
+    const map = vulnerabilitiesMap.get(headOfHouseholdId as string)
+    if (map === undefined) {
+      vulnerabilitiesMap.set(headOfHouseholdId as string, new Set(vulnerabilities))
+    } else {
+      for (const v of vulnerabilities) map.add(v)
+    }
     data.documentType = !['Відсутній', 'відсутній'].includes(record.taxId as string) ?
       'Tax Identification Number' :
       documentTypesDict[record.documentType as keyof typeof documentTypesDict]
@@ -94,9 +104,20 @@ const downloadRais = async (results: unknown[]) => {
       assistances.push(assistance)      
     }
   }
-  const file1 = await fetch(appBaseUrl + 'RAIS - Households.xlsx')
-  const buffer1 = await file1.arrayBuffer()
-  downloadXlsx(buffer1, { data: households }, 'RAIS - Households.xlsx')
+  for (const assistance of assistances) {
+    assistance.vulnerabilities = {}
+    const map = vulnerabilitiesMap.get(assistance.headOfHouseholdId as string)
+    if (map !== undefined) {
+      for (const value of map.values()) {
+        // @ts-ignore
+        // console.log(value, vulnerabilities[value])
+        assistance.vulnerabilities['q' + value] = globalVulnerabilities[value]
+      }
+    }
+  }
+  // const file1 = await fetch(appBaseUrl + 'RAIS - Households.xlsx')
+  // const buffer1 = await file1.arrayBuffer()
+  // downloadXlsx(buffer1, { data: households }, 'RAIS - Households.xlsx')
   const file2 = await fetch(appBaseUrl + 'RAIS - Assistance.xlsx')
   const buffer2 = await file2.arrayBuffer()
   downloadXlsx(buffer2, { data: assistances }, 'RAIS - Assistances.xlsx')
